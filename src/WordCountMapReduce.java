@@ -17,7 +17,5 @@ public class WordCountMapReduce {
             System.out.println(entry.getKey() + ": " + entry.getValue());
         }
 
-        System.out.println("Répertoire de travail : " + System.getProperty("user.dir"));
-
     }
 }
