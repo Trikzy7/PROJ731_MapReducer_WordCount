@@ -2,20 +2,34 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class WordCountMapper {
-    public static List<Map<String, Integer>> map(String fileName, int numMappers) {
+
+    public static List<Map<String, Integer>> mapInParallel(String fileName, int numMappers) {
+        ExecutorService executorService = Executors.newFixedThreadPool(numMappers);
         List<Map<String, Integer>> mapResults = new ArrayList<>();
 
-        // Lecture du contenu du fichier
-        String fileContent = readFile(fileName);
+        try {
+            // Lecture du contenu du fichier
+            String fileContent = WordCountMapper.readFile(fileName);
 
-        // Division du contenu en morceaux
-        List<String> fileParts = splitContent(fileContent, numMappers);
+//            String fileContent = "banane banane fraise prout prout prout fraise lait";
+            // Division du contenu en morceaux
+            List<String> fileParts = WordCountMapper.splitContent(fileContent, numMappers);
 
-        // Phase Map
-        for (String part : fileParts) {
-            mapResults.add(mapSinglePart(part));
+            for (String part : fileParts) {
+                // Exécute chaque Mapper dans un thread différent
+                executorService.execute(() -> mapResults.add(WordCountMapper.mapSinglePart(part)));
+            }
+
+            // Attendez que tous les threads se terminent
+            executorService.shutdown();
+            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         return mapResults;
@@ -28,7 +42,7 @@ public class WordCountMapper {
         while (tokenizer.hasMoreTokens()) {
             String word = tokenizer.nextToken().toLowerCase();
             String derniereLettre = String.valueOf(word.charAt(word.length() - 1));
-            ArrayList<String> ponctuations = new ArrayList<>(Arrays.asList(".", ",", ";", "!", "?", "`", "_", "-", "\"", ":", "'"));
+            ArrayList<String> ponctuations = new ArrayList<>(Arrays.asList(".", ",", ";", "!", "?", "`", "_", "-", "\"", ":", "'", "(", ")", "[", "]"));
             while ((ponctuations.contains(derniereLettre))&&(word.length()!=1)) {
                 // Supprimer la dernière lettre
                 word = word.substring(0, word.length() - 1);
@@ -68,17 +82,27 @@ public class WordCountMapper {
         int contentLength = content.length();
         int partSize = contentLength / numParts;
 
-        for (int i = 0; i < numParts; i++) {
-            int start = i * partSize;
-            int end = (i + 1) * partSize;
-            if (i == numParts - 1) {
-                end = contentLength;
-            }
+        int startIndex = 0;
+        int endIndex;
 
-            String partContent = content.substring(start, end);
+        for (int i = 0; i < numParts; i++) {
+            endIndex = findEndIndex(content, startIndex + partSize);
+
+            String partContent = content.substring(startIndex, endIndex).trim();
             fileParts.add(partContent);
+
+            startIndex = endIndex;
         }
 
         return fileParts;
     }
+
+    private static int findEndIndex(String content, int startIndex) {
+        // Trouver la position du prochain espace à partir de startIndex
+        int index = content.indexOf(' ', startIndex);
+
+        // S'il n'y a pas d'espace, ou si l'espace suivant est à la fin du contenu, retournez la fin du contenu
+        return (index != -1) ? index : content.length();
+    }
+
 }
