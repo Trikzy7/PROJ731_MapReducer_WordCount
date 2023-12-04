@@ -16,7 +16,7 @@ public class WordCountMapper {
             // Lecture du contenu du fichier
             String fileContent = WordCountMapper.readFile(fileName);
 
-//            String fileContent = "banane banane fraise prout prout prout fraise lait";
+            // String fileContent = "banane banane fraise prout prout prout fraise lait";
             // Division du contenu en morceaux
             List<String> fileParts = WordCountMapper.splitContent(fileContent, numMappers);
 
@@ -25,7 +25,7 @@ public class WordCountMapper {
                 executorService.execute(() -> mapResults.add(WordCountMapper.mapSinglePart(part)));
             }
 
-            // Attendez que tous les threads se terminent
+            // Attendre que tous les threads se terminent
             executorService.shutdown();
             executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
@@ -37,40 +37,59 @@ public class WordCountMapper {
 
     private static Map<String, Integer> mapSinglePart(String content) {
         Map<String, Integer> wordCountMap = new HashMap<>();
-
         StringTokenizer tokenizer = new StringTokenizer(content);
         while (tokenizer.hasMoreTokens()) {
+            // recuperation du mot et mis en minuscule
             String word = tokenizer.nextToken().toLowerCase();
-            String derniereLettre = String.valueOf(word.charAt(word.length() - 1));
+
+            // ponctuation à supprimer
             ArrayList<String> ponctuations = new ArrayList<>(Arrays.asList(".", ",", ";", "!", "?", "`", "_", "-", "\"", ":", "'", "(", ")", "[", "]"));
+
+            // derniere lettre du mot
+            String derniereLettre = String.valueOf(word.charAt(word.length() - 1));
+
+            // boucle pour supprimer tous les caracteres de fin qui ne sont pas bons
             while ((ponctuations.contains(derniereLettre))&&(word.length()!=1)) {
                 // Supprimer la dernière lettre
                 word = word.substring(0, word.length() - 1);
+                // recuperer la derniere lettre
                 derniereLettre = String.valueOf(word.charAt(word.length() - 1));
             }
+
+            // premiere lettre du mot
             String premiereLettre = String.valueOf(word.charAt(0));
+
+            // boucle pour supprimer tous les caracteres de debut qui ne sont pas bons
             while ((ponctuations.contains(premiereLettre))&&(word.length()!=1)) {
                 // Supprimer la première lettre
                 word = word.substring(1);
+                // recuperer la premier lettre
                 premiereLettre = String.valueOf(word.charAt(0));
             }
+
+
             wordCountMap.put(word, wordCountMap.getOrDefault(word, 0) + 1);
         }
 
         return wordCountMap;
     }
 
+    // lecture du fichier
     private static String readFile(String fileName) {
-        // Lisez le contenu du fichier et retournez-le sous forme de chaîne
-        // Vous pouvez utiliser différentes méthodes pour cela, par exemple FileReader, Files.readAllBytes, etc.
-        // Voici une version simple pour les besoins de l'exemple :
+        // Lire le contenu du fichier et le retourner sous forme de chaîne
+        // Utilisation de FileReader
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             StringBuilder content = new StringBuilder();
             String line;
+
+            // parcoure des lignes
             while ((line = reader.readLine()) != null) {
                 content.append(line).append("\n");
             }
+
+            // renvoie le contenu
             return content.toString();
+
         } catch (IOException e) {
             e.printStackTrace();
             return "";
