@@ -1,11 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class WordCountMapper {
     public static List<Map<String, Integer>> map(String fileName, int numMappers) {
@@ -32,23 +28,17 @@ public class WordCountMapper {
         while (tokenizer.hasMoreTokens()) {
             String word = tokenizer.nextToken().toLowerCase();
             String derniereLettre = String.valueOf(word.charAt(word.length() - 1));
-            ArrayList<String> ponctuations = new ArrayList<String>();
-            ponctuations.add(".");
-            ponctuations.add(",");
-            ponctuations.add(";");
-            ponctuations.add("!");
-            ponctuations.add("?");
-            ponctuations.add("`");
-            ponctuations.add("_");
-            ponctuations.add("-");
-            ponctuations.add("\"");
-            ponctuations.add(":");
-            ponctuations.add("'");
+            ArrayList<String> ponctuations = new ArrayList<>(Arrays.asList(".", ",", ";", "!", "?", "`", "_", "-", "\"", ":", "'"));
             while ((ponctuations.contains(derniereLettre))&&(word.length()!=1)) {
-//                System.out.println(word);
                 // Supprimer la dernière lettre
                 word = word.substring(0, word.length() - 1);
                 derniereLettre = String.valueOf(word.charAt(word.length() - 1));
+            }
+            String premiereLettre = String.valueOf(word.charAt(0));
+            while ((ponctuations.contains(premiereLettre))&&(word.length()!=1)) {
+                // Supprimer la première lettre
+                word = word.substring(1);
+                premiereLettre = String.valueOf(word.charAt(0));
             }
             wordCountMap.put(word, wordCountMap.getOrDefault(word, 0) + 1);
         }
