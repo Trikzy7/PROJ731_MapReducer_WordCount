@@ -31,6 +31,25 @@ public class WordCountMapper {
         StringTokenizer tokenizer = new StringTokenizer(content);
         while (tokenizer.hasMoreTokens()) {
             String word = tokenizer.nextToken().toLowerCase();
+            String derniereLettre = String.valueOf(word.charAt(word.length() - 1));
+            ArrayList<String> ponctuations = new ArrayList<String>();
+            ponctuations.add(".");
+            ponctuations.add(",");
+            ponctuations.add(";");
+            ponctuations.add("!");
+            ponctuations.add("?");
+            ponctuations.add("`");
+            ponctuations.add("_");
+            ponctuations.add("-");
+            ponctuations.add("\"");
+            ponctuations.add(":");
+            ponctuations.add("'");
+            while ((ponctuations.contains(derniereLettre))&&(word.length()!=1)) {
+//                System.out.println(word);
+                // Supprimer la dernière lettre
+                word = word.substring(0, word.length() - 1);
+                derniereLettre = String.valueOf(word.charAt(word.length() - 1));
+            }
             wordCountMap.put(word, wordCountMap.getOrDefault(word, 0) + 1);
         }
 
