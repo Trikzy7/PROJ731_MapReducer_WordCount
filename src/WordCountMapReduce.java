@@ -13,7 +13,7 @@ public class WordCountMapReduce {
 
         // Nom de fichier par défaut
         String inputFileName = "src/The_Fellowship_Of_The_Ring.txt";
-        int numMappers = 4;  // Remplacez par le nombre de Mappers souhaité
+        int numMappers = 6;  // Remplacez par le nombre de Mappers souhaité
 
         // Phase Map
         List<Map<String, Integer>> mapResults = WordCountMapper.mapInParallel(inputFileName, numMappers);
