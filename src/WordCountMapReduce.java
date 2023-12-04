@@ -17,5 +17,6 @@ public class WordCountMapReduce {
             System.out.println(entry.getKey() + ": " + entry.getValue());
         }
 
+        System.out.println("prout");
     }
 }
