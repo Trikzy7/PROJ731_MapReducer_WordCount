@@ -13,7 +13,7 @@ public class WordCountMapReduce {
 
         // Nom de fichier par défaut
         String inputFileName = "src/The_Fellowship_Of_The_Ring.txt";
-        int numMappers = 6;  // Remplacez par le nombre de Mappers souhaité
+        int numMappers = 6;  // Nombre de Mappers souhaité
 
         // Phase Map
         List<Map<String, Integer>> mapResults = WordCountMapper.mapInParallel(inputFileName, numMappers);
@@ -38,6 +38,7 @@ public class WordCountMapReduce {
         // obtenir la différence entre les deux valeurs de temps nano
         long timeElapsed = endTime - startTime;
 
+        // Affichage du temps pris pour pour exécuter le code
         System.out.println("Execution time in nanoseconds: " + timeElapsed);
         System.out.println("Execution time in milliseconds: " + timeElapsed / 1000000);
 

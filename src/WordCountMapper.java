@@ -96,6 +96,7 @@ public class WordCountMapper {
         }
     }
 
+    // Split du contenu
     private static List<String> splitContent(String content, int numParts) {
         List<String> fileParts = new ArrayList<>();
         int contentLength = content.length();
@@ -104,6 +105,7 @@ public class WordCountMapper {
         int startIndex = 0;
         int endIndex;
 
+        // parcoure le contenu pour le séparer
         for (int i = 0; i < numParts; i++) {
             endIndex = findEndIndex(content, startIndex + partSize);
 
@@ -116,6 +118,7 @@ public class WordCountMapper {
         return fileParts;
     }
 
+    // Trouver l'index de fin
     private static int findEndIndex(String content, int startIndex) {
         // Trouver la position du prochain espace à partir de startIndex
         int index = content.indexOf(' ', startIndex);
