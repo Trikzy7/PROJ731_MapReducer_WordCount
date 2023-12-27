@@ -10,18 +10,20 @@ public class WordCountMapper {
 
     public static List<Map<String, Integer>> mapInParallel(String fileName, int numMappers) {
         ExecutorService executorService = Executors.newFixedThreadPool(numMappers);
-        List<Map<String, Integer>> mapResults = new ArrayList<>();
+        List<Map<String, Integer>> mapResults = Collections.synchronizedList(new ArrayList<>());
 
         try {
             // Lecture du contenu du fichier
-            String fileContent = WordCountMapper.readFile(fileName);
+//            String fileContent = WordCountMapper.readFile(fileName);
 
-//            String fileContent = "banane banane fraise prout prout prout fraise lait";
+            String fileContent = "banane banane fraise prout prout prout fraise lait";
+
             // Division du contenu en morceaux
             List<String> fileParts = WordCountMapper.splitContent(fileContent, numMappers);
 
             for (String part : fileParts) {
                 // Exécute chaque Mapper dans un thread différent
+//                System.out.println(part);
                 executorService.execute(() -> mapResults.add(WordCountMapper.mapSinglePart(part)));
             }
 
@@ -39,16 +41,20 @@ public class WordCountMapper {
         Map<String, Integer> wordCountMap = new HashMap<>();
 
         StringTokenizer tokenizer = new StringTokenizer(content);
+
         while (tokenizer.hasMoreTokens()) {
             String word = tokenizer.nextToken().toLowerCase();
             String derniereLettre = String.valueOf(word.charAt(word.length() - 1));
             ArrayList<String> ponctuations = new ArrayList<>(Arrays.asList(".", ",", ";", "!", "?", "`", "_", "-", "\"", ":", "'", "(", ")", "[", "]"));
+
             while ((ponctuations.contains(derniereLettre))&&(word.length()!=1)) {
                 // Supprimer la dernière lettre
                 word = word.substring(0, word.length() - 1);
                 derniereLettre = String.valueOf(word.charAt(word.length() - 1));
             }
+
             String premiereLettre = String.valueOf(word.charAt(0));
+
             while ((ponctuations.contains(premiereLettre))&&(word.length()!=1)) {
                 // Supprimer la première lettre
                 word = word.substring(1);
@@ -56,6 +62,8 @@ public class WordCountMapper {
             }
             wordCountMap.put(word, wordCountMap.getOrDefault(word, 0) + 1);
         }
+
+//        System.out.println(wordCountMap);
 
         return wordCountMap;
     }

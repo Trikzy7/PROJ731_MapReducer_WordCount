@@ -13,18 +13,27 @@ public class WordCountMapReduce {
 
         // Nom de fichier par défaut
         String inputFileName = "src/The_Fellowship_Of_The_Ring.txt";
-        int numMappers = 6;  // Remplacez par le nombre de Mappers souhaité
+        int numMappers = 4;  // Remplacez par le nombre de Mappers souhaité
 
-        // Phase Map
+        // Phase Map : with multiple thread (=numMappers)
         List<Map<String, Integer>> mapResults = WordCountMapper.mapInParallel(inputFileName, numMappers);
+//        System.out.println(mapResults);
 
-        // Phase Shuffle and Sort : Non nécessaire dans cet exemple simple
+        // Phase Shuffle : On regroupe par word
+        List<Map<String, List<Integer>>> shuffleResults = Hashing.mergeMaps(mapResults);
+//        System.out.println(shuffleResults);
+
+        // Phase Reduce
+        Map<String, Integer> finalWordCount = WordCountReducer.reduceInParallel(shuffleResults);
+//        System.out.println(finalWordCount);
 
         // Phase Reduce (pas nécessaire dans cet exemple, car nous n'avons qu'un seul map)
-        Map<String, Integer> finalWordCount = WordCountReducer.reduce(mapResults);
+//        List<Map<String, Integer>> finalWordCount = WordCountReducer.reduceInParallel(shuffleResults);
+
+
 
         // Affichage du résultat final
-        System.out.println("Word Count:");
+        System.out.println("---------- Word Count:");
         for (Map.Entry<String, Integer> entry : finalWordCount.entrySet()) {
             System.out.println(entry.getKey() + ": " + entry.getValue());
         }
