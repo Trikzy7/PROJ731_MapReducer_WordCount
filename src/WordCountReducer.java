@@ -6,6 +6,12 @@ import java.util.concurrent.TimeUnit;
 public class WordCountReducer {
 
     public static Map<String, Integer> concatenateMaps(List<Map<String, Integer>> listOfMaps) {
+        /*
+        GOAL : Concatener tous les HashMap de la list dans un seul HashMap
+            - INPUT : [{bob=1}, {lait=1, prout=5, theo=1, alice=1, chien=2}, {fraise=2, chat=1, banane=2}]
+            - OUTPUT : {lait=1, prout=5, fraise=2, bob=1, chat=1, theo=1, alice=1, banane=2, chien=2}
+         */
+
         Map<String, Integer> concatenatedMap = new HashMap<>();
 
         // Parcours la liste de HashMap
@@ -25,21 +31,29 @@ public class WordCountReducer {
 
     public static List<Map<String, Integer>> reduceInParallel(List<Map<String, List<Integer>>> inputList) {
         /*
-        GOAL : Return un hashmap le hashmap final sous cette forme : {lait=1, prout=3, fraise=2, banane=2}
-            - Count all word of word with reduceSinglePart : {prout=[2, 1]} -> prout=3
+        GOAL : Return une List de HashMap qui a été reduit: [{bob=1}, {lait=1, prout=5, theo=1, alice=1, chien=2}, {fraise=2, chat=1, banane=2}]
+            - Count all word of word with reduceSinglePart qui prend en input : {lait=[1], prout=[1, 4], theo=[1], alice=[1], chien=[2]}
             - Execute reduceSinglePart for each word in a thread
          */
+
+        // -- Cela va servire a executer plusieurs threads
         ExecutorService executorService = Executors.newFixedThreadPool(inputList.size());
 
-        // Utilisation d'une liste synchronisée pour stocker les résultats intermédiaires
+        // -- Creation d'une list speciale qui va attendre que chaque thread soient terminés
         List<Map<String, Integer>> reduceResult = Collections.synchronizedList(new ArrayList<>());
 
+//        System.out.println(inputList.size());
+
         try {
+            // -- Pour chaque HashMap de shuffleResults
             for (Map<String, List<Integer>> inputMap : inputList) {
-//                System.out.println(inputMap);
+//
                 // Faire chaque reduce dans un thread différent
-//                executorService.execute(() -> reduceResult.add(WordCountReducer.reduceSinglePart(inputMap)));
-                reduceResult.add(WordCountReducer.reduceSinglePart(inputMap));
+                executorService.execute(() -> {
+                    reduceResult.add(WordCountReducer.reduceSinglePart(inputMap));
+//                    System.out.println("REDUCE THREAD");
+                });
+
             }
 
             // Attendez que tous les threads se terminent
@@ -56,27 +70,24 @@ public class WordCountReducer {
     private static Map<String, Integer> reduceSinglePart(Map<String, List<Integer>> inputMap) {
         /*
         GOAL : Fournir un HashMap contenant des  mots avec ses valeurs en entrée {prout=[2, 1], chien=[1, 1]}
-                et retourner (prout=3, chien=2)
+               et return {prout=3, chien=2}
          */
 
+        // -- Creation du HashMap que l'on va return
         Map<String, Integer> resultMap = new HashMap<>();
 
+        // -- Pour chaque couple word=value du HashMap
         for (Map.Entry<String, List<Integer>> entry : inputMap.entrySet()) {
-//            System.out.println(entry);
             String word = entry.getKey();
             List<Integer> counts = entry.getValue();
 
-            // Additionne les occurrences
+            // On dditionne les occurrences
             int totalCount = counts.stream().mapToInt(Integer::intValue).sum();
 
-            // Ajoute le résultat à la nouvelle Map
+            // On ajoute le résultat à la nouvelle Map
             resultMap.put(word, totalCount);
-
         }
 
-//        System.out.println(resultMap);
-
-        // Si la Map d'entrée est vide, renvoyer null ou gérer en conséquence
         return resultMap;
     }
 

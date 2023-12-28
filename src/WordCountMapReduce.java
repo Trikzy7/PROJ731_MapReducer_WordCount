@@ -17,28 +17,32 @@ public class WordCountMapReduce {
 
         // Phase Map : with multiple thread (=numMappers)
         List<Map<String, Integer>> mapResults = WordCountMapper.mapInParallel(inputFileName, numMappers);
-//        System.out.println(mapResults);
+        System.out.println("------- MAP");
+        System.out.println(mapResults);
+        System.out.println("NB de hashMap in list map: " + mapResults.size());
 
-        // Phase Shuffle : On regroupe par word
-        List<Map<String, List<Integer>>> shuffleResults = Hashing.mergeMapsUniform(mapResults, 10);
+
+        // Phase Shuffle : On Repartir tous les mots dans des HashMap de façon uniform
+        List<Map<String, List<Integer>>> shuffleResults = Hashing.mergeMapsUniform(mapResults, 3);
+        System.out.println("------- SHUFFLE");
         System.out.println(shuffleResults);
+        System.out.println("Nb de hashMap in list shuffle: " + shuffleResults.size());
 
-        // Phase Reduce
+//        // Phase Reduce
         List<Map<String, Integer>> reduceResult = WordCountReducer.reduceInParallel(shuffleResults);
+        System.out.println("------- REDUCE");
         System.out.println(reduceResult);
+        System.out.println("Nb de reducer in list reduce: " + reduceResult.size());
 
-        // Phase Reduce OUTPUT FILE:
-//        Map<String, Integer> outputFile = WordCountReducer.concatenateMaps(reduceResult);
-//        System.out.println(outputFile);
-
-        // Phase Reduce (pas nécessaire dans cet exemple, car nous n'avons qu'un seul map)
-//        List<Map<String, Integer>> finalWordCount = WordCountReducer.reduceInParallel(shuffleResults);
-
+//        // Phase Reduce OUTPUT FILE:
+        Map<String, Integer> outputFile = WordCountReducer.concatenateMaps(reduceResult);
+        System.out.println("------- OUTPUT FILE");
+        System.out.println(outputFile);
 
 
         // Affichage du résultat final
 //        System.out.println("---------- Word Count:");
-//        for (Map.Entry<String, Integer> entry : finalWordCount.entrySet()) {
+//        for (Map.Entry<String, Integer> entry : outputFile.entrySet()) {
 //            System.out.println(entry.getKey() + ": " + entry.getValue());
 //        }
 

@@ -44,39 +44,48 @@ public class Hashing {
     }
 
     public static List<Map<String, List<Integer>>> mergeMapsUniform(List<Map<String, Integer>> inputList, int numReducers) {
-        // Utilisation d'une fonction de hachage modulo pour répartir les mots entre les HashMap
-        int numMaps = numReducers; // Utilisez le nombre minimum entre le nombre de reducers et le nombre d'entrées
+        /*
+        GOAL : return une liste de HashMap avec pour chaque HashMap les mots répartis de façon uniforme.
+        Le nombre de HashMap qu'il y aura est soit le nombre de Mapper soit le parametre numReducers
+             - INPUT : [{prout=4}, {lait=1, fraise=1, bob=1, theo=1, alice=1}, {prout=1, fraise=1, banane=2}, {chat=1, chien=2}]
+             - OUTPUT : [{lait=[1], prout=[4, 1], bob=[1], fraise=[1, 1], chat=[1], theo=[1], alice=[1], banane=[2], chien=[2]}]
 
-        Map<String, List<Integer>>[] resultMapArray = new HashMap[numMaps];
+        Remarque : Je voulais avoir la list de hashmap suivant :
+                   [{lait=1}, {prout=2, prout=1}, {fraise=1, fraise=1}, {banane=2}]
+         */
 
+        // -- On choisit le min entre le nb de Mapper (qui est inputList.size() ) et le paramètre numReducers
+        int numMaps = Math.min(numReducers, inputList.size());
+
+        // -- Création de la list de hashMap que l'on va return
+        List<Map<String, List<Integer>>> resultList = new ArrayList<>(numMaps);
+
+        // -- Ajout des HashMap vide (pour l'instant) à la list qu'on va return
         for (int i = 0; i < numMaps; i++) {
-            resultMapArray[i] = new HashMap<>();
+            resultList.add(new HashMap<>());
         }
 
-        // Parcours la liste d'entrée (liste de HashMaps)
+        // -- Remplissage des différents HashMap pour les mots qui sont présents dans les HashMap de la list resultante de la phase de Mapping
+        // Pour chaque HashMap de la list mapResults
         for (Map<String, Integer> inputMap : inputList) {
-            // Parcours chaque HashMap dans la liste d'entrée
+            // Pour chaque couple word=value du HashMapa
             for (Map.Entry<String, Integer> entry : inputMap.entrySet()) {
                 String word = entry.getKey();
                 int count = entry.getValue();
 
-                // Utilise la fonction de hachage modulo pour choisir la HashMap
-                int mapIndex = Math.abs(word.hashCode() % numMaps);
+                int mapIndex = (word.hashCode() & Integer.MAX_VALUE) % numMaps;
 
-                // Ajoute le nombre d'occurrences du mot à la liste résultante de la HashMap correspondante
-                List<Integer> counts = resultMapArray[mapIndex].getOrDefault(word, new ArrayList<>());
-                counts.add(count);
-                resultMapArray[mapIndex].put(word, counts);
+                resultList.get(mapIndex)
+                        .computeIfAbsent(word, k -> new ArrayList<>())
+                        .add(count);
             }
         }
 
-        // Convertit le tableau de HashMaps en une liste de HashMaps
-        List<Map<String, List<Integer>>> resultList = Arrays.asList(resultMapArray);
+//        for (Map<String, List<Integer>> map : resultList) {
+//            System.out.println(map);
+//            System.out.println(map.size());
+//        }
 
-        for(Map<String, List<Integer>> map : resultList){
-            System.out.println(map.size());
-        }
         return resultList;
     }
-
 }
