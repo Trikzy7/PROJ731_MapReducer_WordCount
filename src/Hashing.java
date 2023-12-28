@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Hashing {
     public static List<Map<String, List<Integer>>> mergeMaps(List<Map<String, Integer>> inputList) {
@@ -45,4 +42,41 @@ public class Hashing {
 
         return resultList;
     }
+
+    public static List<Map<String, List<Integer>>> mergeMapsUniform(List<Map<String, Integer>> inputList, int numReducers) {
+        // Utilisation d'une fonction de hachage modulo pour répartir les mots entre les HashMap
+        int numMaps = numReducers; // Utilisez le nombre minimum entre le nombre de reducers et le nombre d'entrées
+
+        Map<String, List<Integer>>[] resultMapArray = new HashMap[numMaps];
+
+        for (int i = 0; i < numMaps; i++) {
+            resultMapArray[i] = new HashMap<>();
+        }
+
+        // Parcours la liste d'entrée (liste de HashMaps)
+        for (Map<String, Integer> inputMap : inputList) {
+            // Parcours chaque HashMap dans la liste d'entrée
+            for (Map.Entry<String, Integer> entry : inputMap.entrySet()) {
+                String word = entry.getKey();
+                int count = entry.getValue();
+
+                // Utilise la fonction de hachage modulo pour choisir la HashMap
+                int mapIndex = Math.abs(word.hashCode() % numMaps);
+
+                // Ajoute le nombre d'occurrences du mot à la liste résultante de la HashMap correspondante
+                List<Integer> counts = resultMapArray[mapIndex].getOrDefault(word, new ArrayList<>());
+                counts.add(count);
+                resultMapArray[mapIndex].put(word, counts);
+            }
+        }
+
+        // Convertit le tableau de HashMaps en une liste de HashMaps
+        List<Map<String, List<Integer>>> resultList = Arrays.asList(resultMapArray);
+
+        for(Map<String, List<Integer>> map : resultList){
+            System.out.println(map.size());
+        }
+        return resultList;
+    }
+
 }

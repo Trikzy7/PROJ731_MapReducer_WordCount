@@ -14,9 +14,9 @@ public class WordCountMapper {
 
         try {
             // Lecture du contenu du fichier
-//            String fileContent = WordCountMapper.readFile(fileName);
+            String fileContent = WordCountMapper.readFile(fileName);
 
-            String fileContent = "banane banane fraise prout prout prout fraise lait";
+//            String fileContent = "banane banane fraise prout prout prout prout prout fraise lait bob alice theo chien chat chien";
 
             // Division du contenu en morceaux
             List<String> fileParts = WordCountMapper.splitContent(fileContent, numMappers);
@@ -25,6 +25,7 @@ public class WordCountMapper {
                 // Exécute chaque Mapper dans un thread différent
 //                System.out.println(part);
                 executorService.execute(() -> mapResults.add(WordCountMapper.mapSinglePart(part)));
+//                mapResults.add(WordCountMapper.mapSinglePart(part));
             }
 
             // Attendez que tous les threads se terminent

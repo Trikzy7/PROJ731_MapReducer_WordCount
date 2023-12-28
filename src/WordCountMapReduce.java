@@ -20,12 +20,16 @@ public class WordCountMapReduce {
 //        System.out.println(mapResults);
 
         // Phase Shuffle : On regroupe par word
-        List<Map<String, List<Integer>>> shuffleResults = Hashing.mergeMaps(mapResults);
-//        System.out.println(shuffleResults);
+        List<Map<String, List<Integer>>> shuffleResults = Hashing.mergeMapsUniform(mapResults, 10);
+        System.out.println(shuffleResults);
 
         // Phase Reduce
-        Map<String, Integer> finalWordCount = WordCountReducer.reduceInParallel(shuffleResults);
-//        System.out.println(finalWordCount);
+        List<Map<String, Integer>> reduceResult = WordCountReducer.reduceInParallel(shuffleResults);
+        System.out.println(reduceResult);
+
+        // Phase Reduce OUTPUT FILE:
+//        Map<String, Integer> outputFile = WordCountReducer.concatenateMaps(reduceResult);
+//        System.out.println(outputFile);
 
         // Phase Reduce (pas nécessaire dans cet exemple, car nous n'avons qu'un seul map)
 //        List<Map<String, Integer>> finalWordCount = WordCountReducer.reduceInParallel(shuffleResults);
@@ -33,10 +37,10 @@ public class WordCountMapReduce {
 
 
         // Affichage du résultat final
-        System.out.println("---------- Word Count:");
-        for (Map.Entry<String, Integer> entry : finalWordCount.entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue());
-        }
+//        System.out.println("---------- Word Count:");
+//        for (Map.Entry<String, Integer> entry : finalWordCount.entrySet()) {
+//            System.out.println(entry.getKey() + ": " + entry.getValue());
+//        }
 
 
 
